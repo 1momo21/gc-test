@@ -1,0 +1,19 @@
+name: gc
+on: [workflow_dispatch]
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq mysql-client redis-tools
+      - name: mysql3307
+        run: |
+          mysql -h 58.247.45.36 -P 3307 -uroot -p'367185F2E623AAB7' --default-auth=mysql_native_password --connect-timeout=30 -e "SELECT VERSION(); SHOW DATABASES; SHOW TABLES;" glocash 2>&1 || true
+      - name: mysql3306
+        run: |
+          mysql -h 58.247.45.36 -P 3306 -uroot -p'367185F2E623AAB7' --connect-timeout=30 -e "SHOW DATABASES;" 2>&1 || true
+      - name: redis
+        run: redis-cli -h 58.247.45.36 -p 6379 -t 10 PING 2>&1 || true
+      - name: web
+        run: |
+          curl -s -m 10 -o /dev/null -w "8080=%{http_code}\n" http://58.247.45.34:8080/ 2>&1 || true
+          curl -sk -m 10 -o /dev/null -w "443=%{http_code}\n" https://58.247.45.36/ 2>&1 || true
